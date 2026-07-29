@@ -1,0 +1,21 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+model Account {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  lastname String
+  username String  @unique
+  email    String  @unique
+  password String
+  balance  Decimal @default(0) @db.Decimal(18, 2)
+
+  @@map("accounts")
+}
