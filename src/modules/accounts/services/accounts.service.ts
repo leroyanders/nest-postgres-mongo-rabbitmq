@@ -25,6 +25,7 @@ export class AccountsService {
         name: true,
         lastname: true,
         email: true,
+        username: true,
         balance: true,
       },
       where: { id },
