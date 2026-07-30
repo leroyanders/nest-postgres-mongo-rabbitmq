@@ -1,4 +1,4 @@
-import { PrismaService } from '../../../database/prisma.service';
+import { PrismaService } from '../../../database/services/prisma.service';
 import { Prisma } from '../../../generated/prisma/client';
 import { TRANSACTION_CREATED_PATTERN } from '../../../shared/contracts/transaction-created.event';
 import { RabbitMqService } from '../../../shared/messaging/rabbitmq.service';

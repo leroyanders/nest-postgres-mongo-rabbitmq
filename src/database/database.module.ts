@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppConfig } from '../config/types/app-config';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from './services/prisma.service';
 
 @Module({
   imports: [

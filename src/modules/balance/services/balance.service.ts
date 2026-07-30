@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma.service';
+import { PrismaService } from '../../../database/services/prisma.service';
 import { Prisma } from '../../../generated/prisma/client';
 import {
   TRANSACTION_CREATED_PATTERN,
