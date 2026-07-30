@@ -12,10 +12,10 @@ import { RABBITMQ_CLIENT } from './rabbitmq.symbols';
         name: RABBITMQ_CLIENT,
         inject: [ConfigService],
         useFactory: (configService: ConfigService<AppConfig, true>) => {
-          const url: string = configService.get('rabbitmq.url', {
+          const url = configService.get<string>('rabbitmq.url', {
             infer: true,
           });
-          const queue: string = configService.get('rabbitmq.queue', {
+          const queue = configService.get<string>('rabbitmq.queue', {
             infer: true,
           });
 
