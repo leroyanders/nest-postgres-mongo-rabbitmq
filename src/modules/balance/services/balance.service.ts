@@ -37,7 +37,7 @@ export class BalanceService {
       accountId,
       amount: amount.toString(),
       balance: balance.toString(),
-      type: TransactionType.withdrawal,
+      type: TransactionType.WITHDRAWAL,
     });
 
     return { balance };
@@ -84,14 +84,14 @@ export class BalanceService {
       accountId: senderId,
       amount: amount.toString(),
       balance: senderBalance.toString(),
-      type: TransactionType.transfer_out,
+      type: TransactionType.TRANSFER_OUT,
       counterpartyId: recipient.account_id,
     });
     this.publishTransactionCreated({
       accountId: recipient.account_id,
       amount: amount.toString(),
       balance: recipientBalance.toString(),
-      type: TransactionType.transfer_in,
+      type: TransactionType.TRANSFER_IN,
       counterpartyId: senderId,
     });
 
