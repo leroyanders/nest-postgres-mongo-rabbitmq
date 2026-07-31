@@ -9,13 +9,22 @@ generator client {
 }
 
 model Account {
-  id       String  @id @default(uuid()) @db.Uuid
-  name     String
-  lastname String
-  username String  @unique
-  email    String  @unique
+  id       String   @id @default(uuid()) @db.Uuid
+  email    String   @unique
   password String
-  balance  Decimal @default(0) @db.Decimal(18, 2)
+  profile  Profile?
 
   @@map("accounts")
+}
+
+model Profile {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  account_id String  @unique @db.Uuid
+  balance    Decimal @default(0) @db.Decimal(18, 2)
+  name       String
+  lastname   String
+  username   String  @unique
+  account    Account @relation(fields: [account_id], references: [id])
+
+  @@map("profiles")
 }
