@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { RABBITMQ_CLIENT } from './rabbitmq.symbols';
+import { RABBITMQ_CLIENT } from '../symbols/rabbitmq.symbols';
 
 @Injectable()
 export class RabbitMqService implements OnModuleInit, OnModuleDestroy {

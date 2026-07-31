@@ -1,5 +1,5 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { TokenService } from '../token.service';
+import { TokenService } from '../services/token.service';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { JwtAuthGuard } from './jwt-auth.guard';
 

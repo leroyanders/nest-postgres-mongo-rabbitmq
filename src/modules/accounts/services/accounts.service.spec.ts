@@ -1,7 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import { PrismaService } from '../../../database/services/prisma.service';
-import { TokenService } from '../../../shared/auth/token.service';
+import { TokenService } from '../../../shared/auth/services/token.service';
 import { SignUpAccountDto } from '../dtos/sign-up-account.dto';
 import { AccountsService } from './accounts.service';
 

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppConfig } from '../../config/types/app-config';
-import { RabbitMqService } from './rabbitmq.service';
-import { RABBITMQ_CLIENT } from './rabbitmq.symbols';
+import { RabbitMqService } from './services/rabbitmq.service';
+import { RABBITMQ_CLIENT } from './symbols/rabbitmq.symbols';
 
 @Module({
   imports: [

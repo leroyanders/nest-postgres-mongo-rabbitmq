@@ -5,7 +5,7 @@ import {
   TRANSACTION_CREATED_PATTERN,
   TransactionCreatedEvent,
 } from '../../../shared/contracts/transaction-created.event';
-import { RabbitMqService } from '../../../shared/messaging/rabbitmq.service';
+import { RabbitMqService } from '../../../shared/messaging/services/rabbitmq.service';
 import { InsufficientFundsError } from '../errors/insufficient-funds.error';
 import { InvalidAmountError } from '../errors/invalid-amount.error';
 import { RecipientNotFoundError } from '../errors/recipient-not-found.error';
