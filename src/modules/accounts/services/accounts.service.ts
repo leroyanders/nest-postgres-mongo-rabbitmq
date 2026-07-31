@@ -22,11 +22,16 @@ export class AccountsService {
     return this.prisma.account.findUniqueOrThrow({
       select: {
         id: true,
-        name: true,
-        lastname: true,
         email: true,
-        username: true,
-        balance: true,
+        profile: {
+          select: {
+            id: true,
+            name: true,
+            lastname: true,
+            username: true,
+            balance: true,
+          },
+        },
       },
       where: { id },
     });
@@ -36,11 +41,15 @@ export class AccountsService {
     const account = await this.prisma.account.create({
       select: { id: true },
       data: {
-        name: dto.name,
-        lastname: dto.lastname,
         email: dto.email,
-        username: dto.username,
         password: await bcrypt.hash(dto.password, BCRYPT_ROUNDS),
+        profile: {
+          create: {
+            name: dto.name,
+            lastname: dto.lastname,
+            username: dto.username,
+          },
+        },
       },
     });
 
@@ -53,7 +62,7 @@ export class AccountsService {
       where: {
         OR: [
           ...(dto.email ? [{ email: dto.email }] : []),
-          ...(dto.username ? [{ username: dto.username }] : []),
+          ...(dto.username ? [{ profile: { username: dto.username } }] : []),
         ],
       },
     });

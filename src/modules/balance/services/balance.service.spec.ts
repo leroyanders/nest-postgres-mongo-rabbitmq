@@ -15,7 +15,7 @@ describe('BalanceService', () => {
   let prisma: {
     $queryRaw: jest.Mock;
     $transaction: jest.Mock;
-    account: { findUnique: jest.Mock };
+    profile: { findUnique: jest.Mock };
   };
   let tx: { $queryRaw: jest.Mock };
   let rabbitMqService: { emit: jest.Mock };
@@ -30,7 +30,7 @@ describe('BalanceService', () => {
         .mockImplementation((fn: (client: unknown) => Promise<unknown>) =>
           fn(tx),
         ),
-      account: { findUnique: jest.fn() },
+      profile: { findUnique: jest.fn() },
     };
     rabbitMqService = { emit: jest.fn().mockResolvedValue(undefined) };
     service = new BalanceService(
@@ -99,11 +99,11 @@ describe('BalanceService', () => {
       await expect(
         service.transfer(SENDER_ID, 'recipient', new Prisma.Decimal('0')),
       ).rejects.toBeInstanceOf(InvalidAmountError);
-      expect(prisma.account.findUnique).not.toHaveBeenCalled();
+      expect(prisma.profile.findUnique).not.toHaveBeenCalled();
     });
 
     it('throws when the recipient does not exist', async () => {
-      prisma.account.findUnique.mockResolvedValue(null);
+      prisma.profile.findUnique.mockResolvedValue(null);
 
       await expect(
         service.transfer(SENDER_ID, 'ghost', new Prisma.Decimal('10')),
@@ -112,7 +112,7 @@ describe('BalanceService', () => {
     });
 
     it('rejects a transfer to your own account', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: SENDER_ID });
+      prisma.profile.findUnique.mockResolvedValue({ account_id: SENDER_ID });
 
       await expect(
         service.transfer(SENDER_ID, 'myself', new Prisma.Decimal('10')),
@@ -121,7 +121,7 @@ describe('BalanceService', () => {
     });
 
     it('debits the sender, credits the recipient and publishes both events', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: RECIPIENT_ID });
+      prisma.profile.findUnique.mockResolvedValue({ account_id: RECIPIENT_ID });
       tx.$queryRaw
         .mockResolvedValueOnce([{ balance: new Prisma.Decimal('70') }])
         .mockResolvedValueOnce([{ balance: new Prisma.Decimal('130') }]);
@@ -157,7 +157,7 @@ describe('BalanceService', () => {
     });
 
     it('credits first when the recipient id orders before the sender id', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: SENDER_ID });
+      prisma.profile.findUnique.mockResolvedValue({ account_id: SENDER_ID });
       tx.$queryRaw
         .mockResolvedValueOnce([{ balance: new Prisma.Decimal('130') }])
         .mockResolvedValueOnce([{ balance: new Prisma.Decimal('70') }]);
@@ -173,7 +173,7 @@ describe('BalanceService', () => {
     });
 
     it('propagates insufficient funds from inside the transaction without publishing', async () => {
-      prisma.account.findUnique.mockResolvedValue({ id: RECIPIENT_ID });
+      prisma.profile.findUnique.mockResolvedValue({ account_id: RECIPIENT_ID });
       tx.$queryRaw.mockResolvedValueOnce([]);
 
       await expect(

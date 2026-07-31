@@ -54,6 +54,22 @@ describe('AccountsService', () => {
       ).resolves.toBe(true);
     });
 
+    it('creates the profile together with the account', async () => {
+      prisma.account.create.mockResolvedValue({ id: 'account-1' });
+
+      await service.registerAccount(dto);
+
+      const [[createArgs]] = prisma.account.create.mock.calls as [
+        [{ data: { email: string; profile: { create: unknown } } }],
+      ];
+      expect(createArgs.data.email).toBe(dto.email);
+      expect(createArgs.data.profile.create).toEqual({
+        name: dto.name,
+        lastname: dto.lastname,
+        username: dto.username,
+      });
+    });
+
     it('returns a token signed for the created account id', async () => {
       prisma.account.create.mockResolvedValue({ id: 'account-1' });
 

@@ -51,8 +51,8 @@ export class BalanceService {
       throw new InvalidAmountError();
     }
 
-    const recipient = await this.prisma.account.findUnique({
-      select: { id: true },
+    const recipient = await this.prisma.profile.findUnique({
+      select: { account_id: true },
       where: { username: recipientUsername },
     });
 
@@ -60,19 +60,19 @@ export class BalanceService {
       throw new RecipientNotFoundError();
     }
 
-    if (recipient.id === senderId) {
+    if (recipient.account_id === senderId) {
       throw new SelfTransferError();
     }
 
     const { senderBalance, recipientBalance } = await this.prisma.$transaction(
       async (tx) => {
-        if (senderId < recipient.id) {
+        if (senderId < recipient.account_id) {
           const debited = await this.debit(tx, senderId, amount);
-          const credited = await this.credit(tx, recipient.id, amount);
+          const credited = await this.credit(tx, recipient.account_id, amount);
           return { senderBalance: debited, recipientBalance: credited };
         }
 
-        const credited = await this.credit(tx, recipient.id, amount);
+        const credited = await this.credit(tx, recipient.account_id, amount);
         const debited = await this.debit(tx, senderId, amount);
         return { senderBalance: debited, recipientBalance: credited };
       },
@@ -84,10 +84,10 @@ export class BalanceService {
       amount: amount.toString(),
       balance: senderBalance.toString(),
       type: 'transfer_out',
-      counterpartyId: recipient.id,
+      counterpartyId: recipient.account_id,
     });
     this.publishTransactionCreated({
-      accountId: recipient.id,
+      accountId: recipient.account_id,
       amount: amount.toString(),
       balance: recipientBalance.toString(),
       type: 'transfer_in',
@@ -103,9 +103,9 @@ export class BalanceService {
     amount: Prisma.Decimal,
   ): Promise<Prisma.Decimal> {
     const rows = await client.$queryRaw<UpdatedBalanceRow[]>`
-      UPDATE "accounts"
+      UPDATE "profiles"
       SET "balance" = "balance" - ${amount}
-      WHERE "id" = ${accountId}::uuid
+      WHERE "account_id" = ${accountId}::uuid
         AND "balance" >= ${amount}
       RETURNING "balance"
     `;
@@ -124,9 +124,9 @@ export class BalanceService {
     amount: Prisma.Decimal,
   ): Promise<Prisma.Decimal> {
     const rows = await client.$queryRaw<UpdatedBalanceRow[]>`
-      UPDATE "accounts"
+      UPDATE "profiles"
       SET "balance" = "balance" + ${amount}
-      WHERE "id" = ${accountId}::uuid
+      WHERE "account_id" = ${accountId}::uuid
       RETURNING "balance"
     `;
 

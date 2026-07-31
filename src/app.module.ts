@@ -6,6 +6,7 @@ import { ConfigurationModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { BalanceModule } from './modules/balance/balance.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
@@ -13,6 +14,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
     ConfigurationModule,
     DatabaseModule,
     AccountsModule,
+    ProfilesModule,
     BalanceModule,
     TransactionsModule,
   ],
