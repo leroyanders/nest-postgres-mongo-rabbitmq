@@ -12,6 +12,7 @@ import { RecipientNotFoundError } from '../errors/recipient-not-found.error';
 import { SelfTransferError } from '../errors/self-transfer.error';
 import { BalanceClient } from '../types/balance-client';
 import { UpdatedBalanceRow } from '../types/updated-balance-row';
+import { TransactionType } from '../../../shared/contracts/transaction-type';
 
 @Injectable()
 export class BalanceService {
@@ -36,7 +37,7 @@ export class BalanceService {
       accountId,
       amount: amount.toString(),
       balance: balance.toString(),
-      type: 'withdrawal',
+      type: TransactionType.withdrawal,
     });
 
     return { balance };
@@ -83,14 +84,14 @@ export class BalanceService {
       accountId: senderId,
       amount: amount.toString(),
       balance: senderBalance.toString(),
-      type: 'transfer_out',
+      type: TransactionType.transfer_out,
       counterpartyId: recipient.account_id,
     });
     this.publishTransactionCreated({
       accountId: recipient.account_id,
       amount: amount.toString(),
       balance: recipientBalance.toString(),
-      type: 'transfer_in',
+      type: TransactionType.transfer_in,
       counterpartyId: senderId,
     });
 

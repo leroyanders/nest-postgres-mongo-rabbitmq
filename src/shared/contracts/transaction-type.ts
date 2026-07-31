@@ -1,1 +1,5 @@
-export type TransactionType = 'withdrawal' | 'transfer_out' | 'transfer_in';
+export enum TransactionType {
+  withdrawal,
+  transfer_out,
+  transfer_in,
+}
