@@ -229,8 +229,8 @@ Base URL: `http://localhost:3000/api`. Protected endpoints expect an `Authorizat
 
 A ready-to-use collection lives in [`postman/`](postman/):
 
-- [`postgres-practice.postman_collection.json`](postman/postgres-practice.postman_collection.json) — every endpoint, grouped by domain, with example bodies;
-- [`local.postman_environment.json`](postman/local.postman_environment.json) — local environment (`baseUrl`, tokens, entity ids).
+- [`postman_collection.json`](postman/postman_collection.json) — every endpoint, grouped by domain, with example bodies;
+- [`postman_environment.json`](postman/postman_environment.json) — local environment (`baseUrl`, tokens, entity ids).
 
 The collection is self-wiring: sign-up/sign-in scripts store the token pair, and create-requests capture entity ids (`storeId`, `productId`, `variantId`, `cartId`, `orderId`, …) into variables, so the happy path can be executed top-to-bottom without copy-pasting a single id. See [`postman/README.md`](postman/README.md) for the walkthrough.
 
