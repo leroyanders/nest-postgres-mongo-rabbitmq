@@ -1,6 +1,6 @@
 import { Prisma } from '../../../generated/prisma/client';
 
-export interface UpdatedWalletRow {
+export interface IUpdatedWalletRow {
   id: string;
   balance: Prisma.Decimal;
   currency: string;

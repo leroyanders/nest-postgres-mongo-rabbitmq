@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AppConfig } from '../../config/types/app-config';
+import { IAppConfig } from '../../config/types/app-config';
 import { RabbitMqService } from './services/rabbitmq.service';
 import { RABBITMQ_CLIENT } from './symbols/rabbitmq.symbols';
 
@@ -11,7 +11,7 @@ import { RABBITMQ_CLIENT } from './symbols/rabbitmq.symbols';
       {
         name: RABBITMQ_CLIENT,
         inject: [ConfigService],
-        useFactory: (configService: ConfigService<AppConfig, true>) => {
+        useFactory: (configService: ConfigService<IAppConfig, true>) => {
           const url = configService.get<string>('rabbitmq.url', {
             infer: true,
           });

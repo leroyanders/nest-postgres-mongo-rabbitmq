@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { ProfileService } from '../../profiles/services/profile.service';
 import { PayOrderDto } from '../dtos/pay-order.dto';
 import { PaymentService } from '../services/payment.service';
@@ -26,14 +26,14 @@ export class PaymentController {
 
   @Post('pay')
   @HttpCode(HttpStatus.OK)
-  async pay(@CurrentUser() user: AuthUser, @Body() dto: PayOrderDto) {
+  async pay(@CurrentUser() user: IAuthUser, @Body() dto: PayOrderDto) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.paymentService.payOrder(profileId, dto);
   }
 
   @Get('order/:orderId')
   async listForOrder(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('orderId', ParseUUIDPipe) orderId: string,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);

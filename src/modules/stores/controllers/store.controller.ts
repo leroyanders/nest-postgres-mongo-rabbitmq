@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { CreateStoreDto } from '../dtos/create-store.dto';
 import { UpdateStoreDto } from '../dtos/update-store.dto';
 import { UpdateStoreStatusDto } from '../dtos/update-store-status.dto';
@@ -26,13 +26,13 @@ export class StoreController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  create(@CurrentUser() user: AuthUser, @Body() dto: CreateStoreDto) {
+  create(@CurrentUser() user: IAuthUser, @Body() dto: CreateStoreDto) {
     return this.storeService.createStore(user.id, dto);
   }
 
   @Get('my')
   @UseGuards(JwtAuthGuard)
-  listMy(@CurrentUser() user: AuthUser) {
+  listMy(@CurrentUser() user: IAuthUser) {
     return this.storeService.listMyStores(user.id);
   }
 
@@ -44,7 +44,7 @@ export class StoreController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStoreDto,
   ) {
@@ -54,7 +54,7 @@ export class StoreController {
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
   updateStatus(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStoreStatusDto,
   ) {
@@ -65,7 +65,7 @@ export class StoreController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async remove(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     await this.storeService.deleteStore(user.id, id);

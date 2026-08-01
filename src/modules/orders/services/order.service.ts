@@ -9,7 +9,7 @@ import { PaymentService } from '../../payments/services/payment.service';
 import { StockService } from '../../stocks/services/stock.service';
 import { CurrencyMismatchError } from '../../wallets/errors/currency-mismatch.error';
 import { WalletService } from '../../wallets/services/wallet.service';
-import { WalletLedgerEntry } from '../../wallets/types/wallet-ledger-entry';
+import { IWalletLedgerEntry } from '../../wallets/types/wallet-ledger-entry';
 import { CheckoutDto } from '../dtos/checkout.dto';
 import { ListOrdersQueryDto } from '../dtos/list-orders-query.dto';
 import { UpdateOrderStatusDto } from '../dtos/update-order-status.dto';
@@ -434,7 +434,7 @@ export class OrderService {
       throw new InvalidOrderStatusTransitionError(order.status, nextStatus);
     }
 
-    const refundEntries: WalletLedgerEntry[] = [];
+    const refundEntries: IWalletLedgerEntry[] = [];
 
     const updated = await this.prisma.$transaction(async (tx) => {
       // Optimistic guard: the transition only happens if the order is still

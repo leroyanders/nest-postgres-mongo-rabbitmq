@@ -2,7 +2,7 @@ import type { WalletTransactionType } from '../../generated/prisma/enums';
 
 export const WALLET_TRANSACTION_CREATED_PATTERN = 'wallet.transaction.created';
 
-export interface WalletTransactionCreatedEvent {
+export interface IWalletTransactionCreatedEvent {
   transactionId: string;
   walletId: string;
   profileId: string;

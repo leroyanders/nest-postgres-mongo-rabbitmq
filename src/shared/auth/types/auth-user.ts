@@ -1,3 +1,3 @@
-export interface AuthUser {
+export interface IAuthUser {
   id: string;
 }

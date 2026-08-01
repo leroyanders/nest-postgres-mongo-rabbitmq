@@ -4,7 +4,7 @@ import {
   WalletTransactionType,
 } from '../../../generated/prisma/enums';
 
-export interface WalletLedgerEntry {
+export interface IWalletLedgerEntry {
   id: string;
   walletId: string;
   type: WalletTransactionType;

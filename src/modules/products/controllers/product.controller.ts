@@ -15,7 +15,7 @@ import {
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../../../common/dtos/pagination-query.dto';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import { CreateProductVariantDto } from '../dtos/create-product-variant.dto';
 import { ListProductsQueryDto } from '../dtos/list-products-query.dto';
@@ -35,7 +35,7 @@ export class ProductController {
   @Get('store/:storeId')
   @UseGuards(JwtAuthGuard)
   listStoreProducts(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('storeId', ParseUUIDPipe) storeId: string,
     @Query() pagination: PaginationQueryDto,
   ) {
@@ -50,14 +50,14 @@ export class ProductController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  create(@CurrentUser() user: AuthUser, @Body() dto: CreateProductDto) {
+  create(@CurrentUser() user: IAuthUser, @Body() dto: CreateProductDto) {
     return this.productService.createProduct(user.id, dto);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProductDto,
   ) {
@@ -68,7 +68,7 @@ export class ProductController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async remove(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     await this.productService.deleteProduct(user.id, id);
@@ -78,7 +78,7 @@ export class ProductController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   addVariant(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateProductVariantDto,
   ) {
@@ -88,7 +88,7 @@ export class ProductController {
   @Patch('variants/:variantId')
   @UseGuards(JwtAuthGuard)
   updateVariant(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('variantId', ParseUUIDPipe) variantId: string,
     @Body() dto: UpdateProductVariantDto,
   ) {
@@ -99,7 +99,7 @@ export class ProductController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async removeVariant(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('variantId', ParseUUIDPipe) variantId: string,
   ): Promise<void> {
     await this.productService.deleteVariant(user.id, variantId);

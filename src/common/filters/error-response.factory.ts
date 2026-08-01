@@ -1,13 +1,13 @@
 import type { Request } from 'express';
-import { ErrorResponse } from '../types/error-response';
+import { IErrorResponse } from '../types/error-response';
 
 export function createErrorResponse(
   request: Request,
   body: Pick<
-    ErrorResponse,
+    IErrorResponse,
     'statusCode' | 'message' | 'error' | 'code' | 'details'
   >,
-): ErrorResponse {
+): IErrorResponse {
   return {
     ...body,
     timestamp: new Date().toISOString(),

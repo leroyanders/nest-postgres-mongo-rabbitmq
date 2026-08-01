@@ -1,4 +1,4 @@
-export interface SessionContext {
+export interface ISessionContext {
   userAgent?: string;
   ipAddress?: string;
 }

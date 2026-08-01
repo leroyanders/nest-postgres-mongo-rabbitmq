@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { AppConfig } from '../../config/types/app-config';
+import { IAppConfig } from '../../config/types/app-config';
 import { PrismaClient } from '../../generated/prisma/client';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class PrismaService
 {
   private readonly logger = new Logger(PrismaService.name);
 
-  constructor(configService: ConfigService<AppConfig, true>) {
+  constructor(configService: ConfigService<IAppConfig, true>) {
     super({
       adapter: new PrismaPg({
         connectionString: configService.get('database.postgres.url', {

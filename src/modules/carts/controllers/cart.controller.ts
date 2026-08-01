@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { ProfileService } from '../../profiles/services/profile.service';
 import { AddCartItemDto } from '../dtos/add-cart-item.dto';
 import { UpdateCartItemDto } from '../dtos/update-cart-item.dto';
@@ -28,21 +28,21 @@ export class CartController {
   ) {}
 
   @Get()
-  async listMy(@CurrentUser() user: AuthUser) {
+  async listMy(@CurrentUser() user: IAuthUser) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.cartService.listMyCarts(profileId);
   }
 
   @Post('items')
   @HttpCode(HttpStatus.OK)
-  async addItem(@CurrentUser() user: AuthUser, @Body() dto: AddCartItemDto) {
+  async addItem(@CurrentUser() user: IAuthUser, @Body() dto: AddCartItemDto) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.cartService.addItem(profileId, dto);
   }
 
   @Patch('items/:itemId')
   async updateItem(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('itemId', ParseUUIDPipe) itemId: string,
     @Body() dto: UpdateCartItemDto,
   ) {
@@ -53,7 +53,7 @@ export class CartController {
   @Delete('items/:itemId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeItem(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('itemId', ParseUUIDPipe) itemId: string,
   ): Promise<void> {
     const profileId = await this.profileService.requireProfileId(user.id);
@@ -63,7 +63,7 @@ export class CartController {
   @Delete(':cartId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async clear(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('cartId', ParseUUIDPipe) cartId: string,
   ): Promise<void> {
     const profileId = await this.profileService.requireProfileId(user.id);

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { ProfileService } from '../../profiles/services/profile.service';
 import { CancelOrderDto } from '../dtos/cancel-order.dto';
 import { CheckoutDto } from '../dtos/checkout.dto';
@@ -35,14 +35,14 @@ export class OrderController {
 
   @Post('checkout')
   @HttpCode(HttpStatus.CREATED)
-  async checkout(@CurrentUser() user: AuthUser, @Body() dto: CheckoutDto) {
+  async checkout(@CurrentUser() user: IAuthUser, @Body() dto: CheckoutDto) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.orderService.checkout(user.id, profileId, dto);
   }
 
   @Get('my')
   async listMy(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Query() query: ListOrdersQueryDto,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);
@@ -51,7 +51,7 @@ export class OrderController {
 
   @Get('my/:id')
   async getMy(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);
@@ -61,7 +61,7 @@ export class OrderController {
   @Post('my/:id/cancel')
   @HttpCode(HttpStatus.OK)
   async cancelMy(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CancelOrderDto,
   ) {
@@ -72,7 +72,7 @@ export class OrderController {
   @Post('my/:id/complete')
   @HttpCode(HttpStatus.OK)
   async completeMy(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);
@@ -85,7 +85,7 @@ export class OrderController {
 
   @Get('store/:storeId')
   listStoreOrders(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('storeId', ParseUUIDPipe) storeId: string,
     @Query() query: ListOrdersQueryDto,
   ) {
@@ -94,7 +94,7 @@ export class OrderController {
 
   @Get('managed/:id')
   getStoreOrder(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.orderService.getStoreOrder(user.id, id);
@@ -102,7 +102,7 @@ export class OrderController {
 
   @Patch('managed/:id/status')
   changeStatus(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateOrderStatusDto,
   ) {

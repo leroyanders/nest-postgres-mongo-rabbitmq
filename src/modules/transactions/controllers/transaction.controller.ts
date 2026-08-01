@@ -2,7 +2,7 @@ import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import type { Channel, Message } from 'amqplib';
 import { WALLET_TRANSACTION_CREATED_PATTERN } from '../../../shared/contracts/wallet-transaction-created.event';
-import type { WalletTransactionCreatedEvent } from '../../../shared/contracts/wallet-transaction-created.event';
+import type { IWalletTransactionCreatedEvent } from '../../../shared/contracts/wallet-transaction-created.event';
 import { TransactionService } from '../services/transaction.service';
 
 @Controller()
@@ -13,7 +13,7 @@ export class TransactionController {
 
   @EventPattern(WALLET_TRANSACTION_CREATED_PATTERN)
   async handleWalletTransactionCreated(
-    @Payload() payload: WalletTransactionCreatedEvent,
+    @Payload() payload: IWalletTransactionCreatedEvent,
     @Ctx() context: RmqContext,
   ): Promise<void> {
     const channel = context.getChannelRef() as Channel;

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { Prisma } from '../../generated/prisma/client';
-import { HttpExceptionBody } from '../types/http-exception-body';
+import { IHttpExceptionBody } from '../types/http-exception-body';
 import { createErrorResponse } from './error-response.factory';
 
 @Catch(
@@ -29,7 +29,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
 
     const httpException = this.mapException(exception);
     const statusCode = httpException.getStatus();
-    const body = httpException.getResponse() as HttpExceptionBody;
+    const body = httpException.getResponse() as IHttpExceptionBody;
 
     response.status(statusCode).json(
       createErrorResponse(request, {

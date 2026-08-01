@@ -7,7 +7,7 @@ import { AdjustStockDto } from '../dtos/adjust-stock.dto';
 import { UpdateStockDto } from '../dtos/update-stock.dto';
 import { InsufficientStockError } from '../errors/insufficient-stock.error';
 import { InvalidStockAdjustmentError } from '../errors/invalid-stock-adjustment.error';
-import { StockView, UpdatedStockRow } from '../types/stock-row';
+import { IStockView, IUpdatedStockRow } from '../types/stock-row';
 
 interface MovementContext {
   orderId?: string;
@@ -88,7 +88,7 @@ export class StockService {
   async adjustStock(
     accountId: string,
     dto: AdjustStockDto,
-  ): Promise<StockView> {
+  ): Promise<IStockView> {
     const variant = await this.prisma.productVariant.findFirstOrThrow({
       select: { id: true, product: { select: { storeId: true } } },
       where: {
@@ -169,7 +169,7 @@ export class StockService {
     accountId: string,
     stockId: string,
     dto: UpdateStockDto,
-  ): Promise<StockView> {
+  ): Promise<IStockView> {
     await this.prisma.stock.findFirstOrThrow({
       select: { id: true },
       where: { id: stockId, store: { ownerId: accountId } },
@@ -206,7 +206,7 @@ export class StockService {
     orderId?: string,
   ): Promise<void> {
     const amount = BigInt(quantity);
-    const rows = await tx.$queryRaw<UpdatedStockRow[]>`
+    const rows = await tx.$queryRaw<IUpdatedStockRow[]>`
       UPDATE "stocks"
       SET "reservedQuantity" = "reservedQuantity" + ${amount}, "updatedAt" = now()
       WHERE "variantId" = ${variantId}::uuid
@@ -234,7 +234,7 @@ export class StockService {
     orderId?: string,
   ): Promise<void> {
     const amount = BigInt(quantity);
-    const rows = await tx.$queryRaw<UpdatedStockRow[]>`
+    const rows = await tx.$queryRaw<IUpdatedStockRow[]>`
       UPDATE "stocks"
       SET "reservedQuantity" = "reservedQuantity" - ${amount}, "updatedAt" = now()
       WHERE "variantId" = ${variantId}::uuid
@@ -261,7 +261,7 @@ export class StockService {
     orderId?: string,
   ): Promise<void> {
     const amount = BigInt(quantity);
-    const rows = await tx.$queryRaw<UpdatedStockRow[]>`
+    const rows = await tx.$queryRaw<IUpdatedStockRow[]>`
       UPDATE "stocks"
       SET "quantity" = "quantity" - ${amount},
           "reservedQuantity" = "reservedQuantity" - ${amount},
@@ -291,7 +291,7 @@ export class StockService {
     orderId?: string,
   ): Promise<void> {
     const amount = BigInt(quantity);
-    const rows = await tx.$queryRaw<UpdatedStockRow[]>`
+    const rows = await tx.$queryRaw<IUpdatedStockRow[]>`
       UPDATE "stocks"
       SET "quantity" = "quantity" + ${amount}, "updatedAt" = now()
       WHERE "variantId" = ${variantId}::uuid
@@ -312,7 +312,7 @@ export class StockService {
 
   private recordMovement(
     tx: Prisma.TransactionClient,
-    row: UpdatedStockRow,
+    row: IUpdatedStockRow,
     type: StockMovementType,
     amount: bigint,
     options: {
@@ -359,7 +359,7 @@ export class StockService {
     reservedQuantity: bigint;
     minQuantity: bigint;
     isActive: boolean;
-  }): StockView {
+  }): IStockView {
     return {
       id: stock.id,
       variantId: stock.variantId,

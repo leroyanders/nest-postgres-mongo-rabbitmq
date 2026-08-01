@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { WalletTransactionCreatedEvent } from '../../../shared/contracts/wallet-transaction-created.event';
+import { IWalletTransactionCreatedEvent } from '../../../shared/contracts/wallet-transaction-created.event';
 import { Transaction } from '../entities/transaction.entity';
 import { TransactionRepository } from '../repositories/transaction.repository';
 
@@ -7,7 +7,7 @@ import { TransactionRepository } from '../repositories/transaction.repository';
 export class TransactionService {
   constructor(private readonly transactionRepository: TransactionRepository) {}
 
-  async create(event: WalletTransactionCreatedEvent): Promise<Transaction> {
+  async create(event: IWalletTransactionCreatedEvent): Promise<Transaction> {
     return this.transactionRepository.create({
       transactionId: event.transactionId,
       walletId: event.walletId,

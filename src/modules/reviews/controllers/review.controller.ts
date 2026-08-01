@@ -15,7 +15,7 @@ import {
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../../../common/dtos/pagination-query.dto';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { ProfileService } from '../../profiles/services/profile.service';
 import { CreateReviewDto } from '../dtos/create-review.dto';
 import { UpdateReviewDto } from '../dtos/update-review.dto';
@@ -39,7 +39,7 @@ export class ReviewController {
   @Get('my')
   @UseGuards(JwtAuthGuard)
   async listMy(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Query() pagination: PaginationQueryDto,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);
@@ -49,7 +49,7 @@ export class ReviewController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  async create(@CurrentUser() user: AuthUser, @Body() dto: CreateReviewDto) {
+  async create(@CurrentUser() user: IAuthUser, @Body() dto: CreateReviewDto) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.reviewService.createReview(profileId, dto);
   }
@@ -57,7 +57,7 @@ export class ReviewController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateReviewDto,
   ) {
@@ -69,7 +69,7 @@ export class ReviewController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async remove(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     const profileId = await this.profileService.requireProfileId(user.id);

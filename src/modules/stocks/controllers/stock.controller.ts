@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { AdjustStockDto } from '../dtos/adjust-stock.dto';
 import { UpdateStockDto } from '../dtos/update-stock.dto';
 import { StockService } from '../services/stock.service';
@@ -24,7 +24,7 @@ export class StockController {
 
   @Get('store/:storeId')
   listStoreStocks(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('storeId', ParseUUIDPipe) storeId: string,
   ) {
     return this.stockService.listStoreStocks(user.id, storeId);
@@ -32,7 +32,7 @@ export class StockController {
 
   @Get(':id/movements')
   listMovements(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.stockService.listMovements(user.id, id);
@@ -40,13 +40,13 @@ export class StockController {
 
   @Post('adjust')
   @HttpCode(HttpStatus.OK)
-  adjust(@CurrentUser() user: AuthUser, @Body() dto: AdjustStockDto) {
+  adjust(@CurrentUser() user: IAuthUser, @Body() dto: AdjustStockDto) {
     return this.stockService.adjustStock(user.id, dto);
   }
 
   @Patch(':id')
   update(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateStockDto,
   ) {

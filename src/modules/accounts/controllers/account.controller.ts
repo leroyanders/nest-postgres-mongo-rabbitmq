@@ -11,12 +11,12 @@ import {
 import type { Request } from 'express';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { RefreshTokenDto } from '../dtos/refresh-token.dto';
 import { SignInAccountDto } from '../dtos/sign-in-account.dto';
 import { SignUpAccountDto } from '../dtos/sign-up-account.dto';
 import { AccountService } from '../services/account.service';
-import { SessionContext } from '../types/session-context';
+import { ISessionContext } from '../types/session-context';
 
 @Controller('account')
 export class AccountController {
@@ -24,7 +24,7 @@ export class AccountController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getAccount(@CurrentUser() user: AuthUser) {
+  getAccount(@CurrentUser() user: IAuthUser) {
     return this.accountService.getAccount(user.id);
   }
 
@@ -58,7 +58,7 @@ export class AccountController {
     await this.accountService.logoutAccount(dto.refreshToken);
   }
 
-  private sessionContext(request: Request): SessionContext {
+  private sessionContext(request: Request): ISessionContext {
     return {
       userAgent: request.headers['user-agent'],
       ipAddress: request.ip,

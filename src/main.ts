@@ -3,11 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
-import { AppConfig } from './config/types/app-config';
+import { IAppConfig } from './config/types/app-config';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService<AppConfig, true>);
+  const configService = app.get(ConfigService<IAppConfig, true>);
   const rabbitmqUrl = configService.get<string>('rabbitmq.url', {
     infer: true,
   });

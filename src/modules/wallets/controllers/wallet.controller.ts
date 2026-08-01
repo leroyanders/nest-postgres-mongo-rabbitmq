@@ -12,7 +12,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { PaginationQueryDto } from '../../../common/dtos/pagination-query.dto';
 import { Prisma } from '../../../generated/prisma/client';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { ProfileService } from '../../profiles/services/profile.service';
 import { DepositWalletDto } from '../dtos/deposit-wallet.dto';
 import { WithdrawWalletDto } from '../dtos/withdraw-wallet.dto';
@@ -27,14 +27,14 @@ export class WalletController {
   ) {}
 
   @Get()
-  async getWallet(@CurrentUser() user: AuthUser) {
+  async getWallet(@CurrentUser() user: IAuthUser) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.walletService.getWallet(profileId);
   }
 
   @Get('transactions')
   async listTransactions(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Query() pagination: PaginationQueryDto,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);
@@ -43,7 +43,7 @@ export class WalletController {
 
   @Post('deposit')
   @HttpCode(HttpStatus.OK)
-  async deposit(@CurrentUser() user: AuthUser, @Body() dto: DepositWalletDto) {
+  async deposit(@CurrentUser() user: IAuthUser, @Body() dto: DepositWalletDto) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.walletService.deposit(
       profileId,
@@ -55,7 +55,7 @@ export class WalletController {
   @Post('withdraw')
   @HttpCode(HttpStatus.OK)
   async withdraw(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Body() dto: WithdrawWalletDto,
   ) {
     const profileId = await this.profileService.requireProfileId(user.id);

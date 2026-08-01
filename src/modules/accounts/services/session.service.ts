@@ -1,11 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, randomBytes } from 'crypto';
-import { AppConfig } from '../../../config/types/app-config';
+import { IAppConfig } from '../../../config/types/app-config';
 import { PrismaService } from '../../../database/services/prisma.service';
-import { SessionContext } from '../types/session-context';
+import { ISessionContext } from '../types/session-context';
 
-const TTL_PATTERN = /^(\d+)(s|m|h|d)$/;
+const TTL_PATTERN = /^(\d+)([smhd])$/;
 const UNIT_MS: Record<string, number> = {
   s: 1_000,
   m: 60_000,
@@ -19,14 +19,14 @@ export class SessionService {
 
   constructor(
     private readonly prisma: PrismaService,
-    configService: ConfigService<AppConfig, true>,
+    configService: ConfigService<IAppConfig, true>,
   ) {
     this.refreshTtlMs = this.parseTtl(
       configService.get('jwt.refreshExpiresIn', { infer: true }),
     );
   }
 
-  async issue(accountId: string, context: SessionContext): Promise<string> {
+  async issue(accountId: string, context: ISessionContext): Promise<string> {
     const refreshToken = randomBytes(48).toString('base64url');
 
     await this.prisma.session.create({
@@ -45,7 +45,7 @@ export class SessionService {
 
   async rotate(
     refreshToken: string,
-    context: SessionContext,
+    context: ISessionContext,
   ): Promise<{ accountId: string; refreshToken: string }> {
     const session = await this.prisma.session.findUnique({
       select: { id: true, accountId: true, expiresAt: true, revokedAt: true },

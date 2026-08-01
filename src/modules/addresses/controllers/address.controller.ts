@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../shared/auth/guards/jwt-auth.guard';
-import type { AuthUser } from '../../../shared/auth/types/auth-user';
+import type { IAuthUser } from '../../../shared/auth/types/auth-user';
 import { ProfileService } from '../../profiles/services/profile.service';
 import { CreateAddressDto } from '../dtos/create-address.dto';
 import { UpdateAddressDto } from '../dtos/update-address.dto';
@@ -28,21 +28,21 @@ export class AddressController {
   ) {}
 
   @Get()
-  async list(@CurrentUser() user: AuthUser) {
+  async list(@CurrentUser() user: IAuthUser) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.addressService.listAddresses(profileId);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@CurrentUser() user: AuthUser, @Body() dto: CreateAddressDto) {
+  async create(@CurrentUser() user: IAuthUser, @Body() dto: CreateAddressDto) {
     const profileId = await this.profileService.requireProfileId(user.id);
     return this.addressService.createAddress(profileId, dto);
   }
 
   @Patch(':id')
   async update(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAddressDto,
   ) {
@@ -53,7 +53,7 @@ export class AddressController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
-    @CurrentUser() user: AuthUser,
+    @CurrentUser() user: IAuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     const profileId = await this.profileService.requireProfileId(user.id);

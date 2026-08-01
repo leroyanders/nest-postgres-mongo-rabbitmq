@@ -11,15 +11,15 @@ import {
 } from '../../../generated/prisma/enums';
 import {
   WALLET_TRANSACTION_CREATED_PATTERN,
-  WalletTransactionCreatedEvent,
+  IWalletTransactionCreatedEvent,
 } from '../../../shared/contracts/wallet-transaction-created.event';
 import { RabbitMqService } from '../../../shared/messaging/services/rabbitmq.service';
 import { CurrencyMismatchError } from '../errors/currency-mismatch.error';
 import { InsufficientFundsError } from '../errors/insufficient-funds.error';
 import { InvalidAmountError } from '../errors/invalid-amount.error';
 import { WalletNotFoundError } from '../errors/wallet-not-found.error';
-import { UpdatedWalletRow } from '../types/updated-wallet-row';
-import { WalletLedgerEntry } from '../types/wallet-ledger-entry';
+import { IUpdatedWalletRow } from '../types/updated-wallet-row';
+import { IWalletLedgerEntry } from '../types/wallet-ledger-entry';
 
 const LEDGER_SELECT = {
   id: true,
@@ -120,7 +120,7 @@ export class WalletService {
     amount: Prisma.Decimal,
     currency: string,
     orderId: string,
-  ): Promise<WalletLedgerEntry> {
+  ): Promise<IWalletLedgerEntry> {
     this.assertPositive(amount);
     await this.assertCurrency(tx, profileId, currency);
 
@@ -141,7 +141,7 @@ export class WalletService {
     amount: Prisma.Decimal,
     currency: string,
     orderId: string,
-  ): Promise<WalletLedgerEntry> {
+  ): Promise<IWalletLedgerEntry> {
     this.assertPositive(amount);
     await this.assertCurrency(tx, profileId, currency);
 
@@ -152,8 +152,8 @@ export class WalletService {
     });
   }
 
-  publishLedgerEvent(profileId: string, entry: WalletLedgerEntry): void {
-    const event: WalletTransactionCreatedEvent = {
+  publishLedgerEvent(profileId: string, entry: IWalletLedgerEntry): void {
+    const event: IWalletTransactionCreatedEvent = {
       transactionId: entry.id,
       walletId: entry.walletId,
       profileId,
@@ -181,8 +181,8 @@ export class WalletService {
     profileId: string,
     amount: Prisma.Decimal,
     options: LedgerOptions,
-  ): Promise<WalletLedgerEntry> {
-    const rows = await tx.$queryRaw<UpdatedWalletRow[]>`
+  ): Promise<IWalletLedgerEntry> {
+    const rows = await tx.$queryRaw<IUpdatedWalletRow[]>`
       UPDATE "wallets"
       SET "balance" = "balance" - ${amount}, "updatedAt" = now()
       WHERE "profileId" = ${profileId}::uuid
@@ -209,8 +209,8 @@ export class WalletService {
     profileId: string,
     amount: Prisma.Decimal,
     options: LedgerOptions,
-  ): Promise<WalletLedgerEntry> {
-    const rows = await tx.$queryRaw<UpdatedWalletRow[]>`
+  ): Promise<IWalletLedgerEntry> {
+    const rows = await tx.$queryRaw<IUpdatedWalletRow[]>`
       UPDATE "wallets"
       SET "balance" = "balance" + ${amount}, "updatedAt" = now()
       WHERE "profileId" = ${profileId}::uuid
@@ -233,11 +233,11 @@ export class WalletService {
 
   private recordLedgerEntry(
     tx: Prisma.TransactionClient,
-    wallet: UpdatedWalletRow,
+    wallet: IUpdatedWalletRow,
     amount: Prisma.Decimal,
     balanceBefore: Prisma.Decimal,
     options: LedgerOptions,
-  ): Promise<WalletLedgerEntry> {
+  ): Promise<IWalletLedgerEntry> {
     return tx.walletTransaction.create({
       select: LEDGER_SELECT,
       data: {

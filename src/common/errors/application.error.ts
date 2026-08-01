@@ -1,4 +1,4 @@
-import { ApplicationErrorOptions } from '../types/application-error-options';
+import { IApplicationErrorOptions } from '../types/application-error-options';
 
 export abstract class ApplicationError extends Error {
   readonly statusCode: number;
@@ -6,7 +6,7 @@ export abstract class ApplicationError extends Error {
   readonly code: string;
   readonly details?: unknown;
 
-  protected constructor(options: ApplicationErrorOptions) {
+  protected constructor(options: IApplicationErrorOptions) {
     super(options.message);
 
     this.name = new.target.name;

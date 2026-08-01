@@ -1,10 +1,10 @@
-export interface UpdatedStockRow {
+export interface IUpdatedStockRow {
   id: string;
   quantity: bigint;
   reservedQuantity: bigint;
 }
 
-export interface StockView {
+export interface IStockView {
   id: string;
   variantId: string;
   quantity: number;

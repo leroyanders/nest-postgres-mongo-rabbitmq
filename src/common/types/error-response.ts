@@ -1,4 +1,4 @@
-export type ErrorResponse = {
+export interface IErrorResponse {
   statusCode: number;
   timestamp: string;
   path: string;
@@ -7,4 +7,4 @@ export type ErrorResponse = {
   error: string;
   code?: string;
   details?: unknown;
-};
+}

@@ -1,8 +1,8 @@
-import { AppConfig } from './types/app-config';
+import { IAppConfig } from './types/app-config';
 
 // Environment variables are validated in env.validation.ts before the app
 // starts, so the assertions below are safe at runtime.
-export const configuration = (): AppConfig => ({
+export const configuration = (): IAppConfig => ({
   port: parseInt(process.env.PORT ?? '3000', 10),
   database: {
     postgres: {

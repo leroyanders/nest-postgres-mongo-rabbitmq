@@ -9,8 +9,8 @@ import { AccountStatus } from '../../../generated/prisma/enums';
 import { TokenService } from '../../../shared/auth/services/token.service';
 import { SignInAccountDto } from '../dtos/sign-in-account.dto';
 import { SignUpAccountDto } from '../dtos/sign-up-account.dto';
-import { AuthTokens } from '../types/auth-tokens';
-import { SessionContext } from '../types/session-context';
+import { IAuthTokens } from '../types/auth-tokens';
+import { ISessionContext } from '../types/session-context';
 import { SessionService } from './session.service';
 
 const BCRYPT_ROUNDS = 10;
@@ -52,8 +52,8 @@ export class AccountService {
 
   async registerAccount(
     dto: SignUpAccountDto,
-    context: SessionContext,
-  ): Promise<AuthTokens> {
+    context: ISessionContext,
+  ): Promise<IAuthTokens> {
     const account = await this.prisma.account.create({
       select: { id: true },
       data: {
@@ -75,8 +75,8 @@ export class AccountService {
 
   async loginAccount(
     dto: SignInAccountDto,
-    context: SessionContext,
-  ): Promise<AuthTokens> {
+    context: ISessionContext,
+  ): Promise<IAuthTokens> {
     const account = await this.prisma.account.findFirst({
       select: { id: true, password: true, status: true },
       where: {
@@ -115,8 +115,8 @@ export class AccountService {
 
   async refreshTokens(
     refreshToken: string,
-    context: SessionContext,
-  ): Promise<AuthTokens> {
+    context: ISessionContext,
+  ): Promise<IAuthTokens> {
     const rotated = await this.sessionService.rotate(refreshToken, context);
 
     const account = await this.prisma.account.findUnique({
@@ -140,8 +140,8 @@ export class AccountService {
 
   private async issueTokens(
     accountId: string,
-    context: SessionContext,
-  ): Promise<AuthTokens> {
+    context: ISessionContext,
+  ): Promise<IAuthTokens> {
     return {
       accessToken: this.tokenService.sign(accountId),
       refreshToken: await this.sessionService.issue(accountId, context),

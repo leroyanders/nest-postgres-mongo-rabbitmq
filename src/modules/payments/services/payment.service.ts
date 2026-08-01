@@ -7,7 +7,7 @@ import {
   PaymentStatus,
 } from '../../../generated/prisma/enums';
 import { WalletService } from '../../wallets/services/wallet.service';
-import { WalletLedgerEntry } from '../../wallets/types/wallet-ledger-entry';
+import { IWalletLedgerEntry } from '../../wallets/types/wallet-ledger-entry';
 import { PayOrderDto } from '../dtos/pay-order.dto';
 import { OrderAlreadyPaidError } from '../errors/order-already-paid.error';
 import { OrderNotPayableError } from '../errors/order-not-payable.error';
@@ -129,7 +129,7 @@ export class PaymentService {
   async refundOrderPayments(
     tx: Prisma.TransactionClient,
     order: { id: string; profileId: string; currency: string },
-  ): Promise<WalletLedgerEntry[]> {
+  ): Promise<IWalletLedgerEntry[]> {
     const payments = await tx.payment.findMany({
       select: { id: true, amount: true, refundedAmount: true },
       where: {
@@ -139,7 +139,7 @@ export class PaymentService {
       },
     });
 
-    const entries: WalletLedgerEntry[] = [];
+    const entries: IWalletLedgerEntry[] = [];
 
     for (const payment of payments) {
       const remaining = payment.amount.minus(payment.refundedAmount);
