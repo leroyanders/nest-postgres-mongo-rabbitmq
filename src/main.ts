@@ -8,6 +8,12 @@ import { AppConfig } from './config/types/app-config';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService<AppConfig, true>);
+  const rabbitmqUrl = configService.get<string>('rabbitmq.url', {
+    infer: true,
+  });
+  const rabbitmqQueue = configService.get<string>('rabbitmq.queue', {
+    infer: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -16,15 +22,9 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
+
+  app.setGlobalPrefix('api');
   app.enableShutdownHooks();
-
-  const rabbitmqUrl: string = configService.get('rabbitmq.url', {
-    infer: true,
-  });
-  const rabbitmqQueue: string = configService.get('rabbitmq.queue', {
-    infer: true,
-  });
-
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {

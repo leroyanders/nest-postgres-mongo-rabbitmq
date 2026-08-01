@@ -11,6 +11,7 @@ export interface AppConfig {
   jwt: {
     secret: string;
     expiresIn: string;
+    refreshExpiresIn: string;
   };
   rabbitmq: {
     url: string;

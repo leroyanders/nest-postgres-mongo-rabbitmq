@@ -15,6 +15,7 @@ export const configuration = (): AppConfig => ({
   jwt: {
     secret: process.env.APP_JWT_SECRET as string,
     expiresIn: process.env.APP_JWT_EXPIRES_IN ?? '1h',
+    refreshExpiresIn: process.env.APP_JWT_REFRESH_EXPIRES_IN ?? '30d',
   },
   rabbitmq: {
     url: process.env.RABBITMQ_URL as string,

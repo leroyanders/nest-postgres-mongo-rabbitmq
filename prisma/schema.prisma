@@ -8,23 +8,658 @@ generator client {
   moduleFormat = "cjs"
 }
 
-model Account {
-  id       String   @id @default(uuid()) @db.Uuid
-  email    String   @unique
-  password String
-  profile  Profile?
+// ======================================================
+// ENUMS
+// ======================================================
 
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum StoreStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProductVariantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PROCESSING
+  IN_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  CASH
+  WALLET
+  BANK_TRANSFER
+}
+
+enum StockMovementType {
+  INCOME
+  RESERVE
+  RELEASE
+  SALE
+  RETURN
+  CORRECTION
+  WRITE_OFF
+}
+
+enum WalletTransactionType {
+  DEPOSIT
+  PAYMENT
+  REFUND
+  WITHDRAWAL
+  CORRECTION
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AddressType {
+  HOME
+  WORK
+  OTHER
+}
+
+// ======================================================
+// ACCOUNT
+// ======================================================
+
+model Account {
+  id       String        @id @default(uuid()) @db.Uuid
+  email    String        @unique
+  password String
+  status   AccountStatus @default(ACTIVE)
+
+  emailVerifiedAt DateTime?
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  profile            Profile?
+  stores             Store[]
+  sessions           Session[]
+  orderStatusChanges OrderStatusHistory[]
+
+  @@index([status])
+  @@index([createdAt])
   @@map("accounts")
 }
 
+// ======================================================
+// SESSION
+// ======================================================
+
+model Session {
+  id               String  @id @default(uuid()) @db.Uuid
+  refreshTokenHash String  @unique
+  userAgent        String?
+  ipAddress        String?
+  accountId        String  @db.Uuid
+
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ======================================================
+// PROFILE
+// ======================================================
+
 model Profile {
-  id         String  @id @default(uuid(7)) @db.Uuid
-  account_id String  @unique @db.Uuid
-  balance    Decimal @default(0) @db.Decimal(18, 2)
-  name       String
-  lastname   String
-  username   String  @unique
-  account    Account @relation(fields: [account_id], references: [id])
+  id        String  @id @default(uuid()) @db.Uuid
+  name      String
+  lastname  String
+  username  String  @unique
+  phone     String?
+  avatar    String?
+  accountId String  @unique @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  wallet    Wallet?
+  addresses Address[]
+  carts     Cart[]
+  orders    Order[]
+  reviews   Review[]
 
   @@map("profiles")
+}
+
+// ======================================================
+// WALLET
+// ======================================================
+
+model Wallet {
+  id        String  @id @default(uuid()) @db.Uuid
+  balance   Decimal @default(0) @db.Decimal(18, 2)
+  currency  String  @default("UAH") @db.Char(3)
+  profileId String  @unique @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  profile      Profile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id            String                  @id @default(uuid()) @db.Uuid
+  type          WalletTransactionType
+  status        WalletTransactionStatus @default(PENDING)
+  amount        Decimal                 @db.Decimal(18, 2)
+  balanceBefore Decimal                 @db.Decimal(18, 2)
+  balanceAfter  Decimal                 @db.Decimal(18, 2)
+  currency      String                  @default("UAH") @db.Char(3)
+  description   String?
+  referenceId   String?
+  metadata      Json?
+  walletId      String                  @db.Uuid
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Restrict)
+
+  @@index([walletId])
+  @@index([type])
+  @@index([status])
+  @@index([referenceId])
+  @@index([createdAt])
+  @@map("wallet_transactions")
+}
+
+// ======================================================
+// ADDRESS
+// ======================================================
+
+model Address {
+  id            String      @id @default(uuid()) @db.Uuid
+  type          AddressType @default(HOME)
+  recipientName String
+  phone         String
+  country       String      @default("Ukraine")
+  region        String
+  city          String
+  street        String
+  building      String
+  apartment     String?
+  entrance      String?
+  floor         String?
+  postalCode    String?
+  comment       String?
+  isDefault     Boolean     @default(false)
+  profileId     String      @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([profileId, isDefault])
+  @@map("addresses")
+}
+
+// ======================================================
+// STORE
+// ======================================================
+
+model Store {
+  id          String      @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String      @unique
+  description String?
+  logo        String?
+  banner      String?
+  phone       String?
+  email       String?
+  status      StoreStatus @default(DRAFT)
+  ownerId     String      @db.Uuid
+  createdAt   DateTime?   @default(now())
+
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  owner    Account   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  products Product[]
+  stocks   Stock[]
+  carts    Cart[]
+  orders   Order[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("stores")
+}
+
+// ======================================================
+// CATEGORY
+// ======================================================
+
+model Category {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String  @unique
+  description String?
+  image       String?
+  isActive    Boolean @default(true)
+  position    Int     @default(0)
+  parentId    String? @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
+  products ProductCategory[]
+
+  @@index([parentId])
+  @@index([isActive])
+  @@index([position])
+  @@map("categories")
+}
+
+// ======================================================
+// PRODUCT
+// ======================================================
+
+model Product {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String
+  description String?
+  images      String[]      @default([])
+  status      ProductStatus @default(DRAFT)
+  brand       String?
+  attributes  Json?
+  storeId     String        @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  store      Store             @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  variants   ProductVariant[]
+  categories ProductCategory[]
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([status])
+  @@index([brand])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model ProductCategory {
+  productId  String @db.Uuid
+  categoryId String @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([categoryId])
+  @@map("product_categories")
+}
+
+// ======================================================
+// PRODUCT VARIANT
+// ======================================================
+
+model ProductVariant {
+  id         String               @id @default(uuid()) @db.Uuid
+  name       String?
+  sku        String               @unique
+  barcode    String?              @unique
+  price      Decimal              @db.Decimal(18, 2)
+  oldPrice   Decimal?             @db.Decimal(18, 2)
+  costPrice  Decimal?             @db.Decimal(18, 2)
+  currency   String               @default("UAH") @db.Char(3)
+  attributes Json?
+  images     String[]             @default([])
+  weight     Decimal?             @db.Decimal(10, 3)
+  status     ProductVariantStatus @default(ACTIVE)
+  isDefault  Boolean              @default(false)
+  productId  String               @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+  stock      Stock?
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@index([status])
+  @@index([productId, isDefault])
+  @@map("product_variants")
+}
+
+// ======================================================
+// STOCK
+// ======================================================
+
+model Stock {
+  id               String  @id @default(uuid()) @db.Uuid
+  quantity         BigInt  @default(0)
+  reservedQuantity BigInt  @default(0)
+  minQuantity      BigInt  @default(0)
+  isActive         Boolean @default(true)
+  storeId          String  @db.Uuid
+  variantId        String  @unique @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  store     Store           @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  variant   ProductVariant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  movements StockMovement[]
+
+  @@index([storeId])
+  @@index([isActive])
+  @@index([quantity])
+  @@map("stocks")
+}
+
+model StockMovement {
+  id             String            @id @default(uuid()) @db.Uuid
+  type           StockMovementType
+  quantity       BigInt
+  quantityBefore BigInt
+  quantityAfter  BigInt
+  reservedBefore BigInt
+  reservedAfter  BigInt
+  reason         String?
+  metadata       Json?
+  stockId        String            @db.Uuid
+  orderId        String?           @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  stock Stock  @relation(fields: [stockId], references: [id], onDelete: Restrict)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([stockId])
+  @@index([orderId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+// ======================================================
+// CART
+// ======================================================
+
+model Cart {
+  id        String @id @default(uuid()) @db.Uuid
+  profileId String @db.Uuid
+  storeId   String @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  profile Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  store   Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items   CartItem[]
+
+  @@unique([profileId, storeId])
+  @@index([profileId])
+  @@index([storeId])
+  @@map("carts")
+}
+
+model CartItem {
+  id        String @id @default(uuid()) @db.Uuid
+  quantity  Int    @default(1)
+  cartId    String @db.Uuid
+  variantId String @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, variantId])
+  @@index([variantId])
+  @@map("cart_items")
+}
+
+// ======================================================
+// ORDER
+// ======================================================
+
+model Order {
+  id                 String      @id @default(uuid()) @db.Uuid
+  number             String      @unique
+  status             OrderStatus @default(PENDING)
+  currency           String      @default("UAH") @db.Char(3)
+  subtotal           Decimal     @db.Decimal(18, 2)
+  discountAmount     Decimal     @default(0) @db.Decimal(18, 2)
+  deliveryPrice      Decimal     @default(0) @db.Decimal(18, 2)
+  totalAmount        Decimal     @db.Decimal(18, 2)
+  comment            String?
+  cancellationReason String?
+
+  recipientName   String
+  recipientPhone  String
+  country         String  @default("Ukraine")
+  region          String
+  city            String
+  street          String
+  building        String
+  apartment       String?
+  entrance        String?
+  floor           String?
+  postalCode      String?
+  deliveryComment String?
+
+  trackingNumber   String?
+  deliveryProvider String?
+
+  storeId   String @db.Uuid
+  profileId String @db.Uuid
+
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+  acceptedAt   DateTime?
+  processingAt DateTime?
+  deliveredAt  DateTime?
+  completedAt  DateTime?
+  cancelledAt  DateTime?
+  returnedAt   DateTime?
+
+  store          Store                @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  profile        Profile              @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  items          OrderItem[]
+  payments       Payment[]
+  statusHistory  OrderStatusHistory[]
+  stockMovements StockMovement[]
+
+  @@index([storeId])
+  @@index([profileId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([profileId, createdAt])
+  @@index([storeId, status])
+  @@map("orders")
+}
+
+// ======================================================
+// ORDER ITEM
+// ======================================================
+
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  orderId   String  @db.Uuid
+  productId String? @db.Uuid
+  variantId String? @db.Uuid
+
+  productName       String
+  variantName       String?
+  sku               String?
+  productImage      String?
+  productAttributes Json?
+
+  quantity   Int
+  price      Decimal @db.Decimal(18, 2)
+  totalPrice Decimal @db.Decimal(18, 2)
+  currency   String  @default("UAH") @db.Char(3)
+
+  createdAt DateTime @default(now())
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  review  Review?
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([variantId])
+  @@map("order_items")
+}
+
+// ======================================================
+// ORDER STATUS HISTORY
+// ======================================================
+
+model OrderStatusHistory {
+  id                 String       @id @default(uuid()) @db.Uuid
+  previousStatus     OrderStatus?
+  status             OrderStatus
+  comment            String?
+  orderId            String       @db.Uuid
+  changedByAccountId String?      @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  changedByAccount Account? @relation(fields: [changedByAccountId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([changedByAccountId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("order_status_history")
+}
+
+// ======================================================
+// PAYMENT
+// ======================================================
+
+model Payment {
+  id             String        @id @default(uuid()) @db.Uuid
+  status         PaymentStatus @default(PENDING)
+  method         PaymentMethod
+  provider       String?
+  externalId     String?
+  idempotencyKey String?       @unique
+  amount         Decimal       @db.Decimal(18, 2)
+  refundedAmount Decimal       @default(0) @db.Decimal(18, 2)
+  currency       String        @default("UAH") @db.Char(3)
+  failureCode    String?
+  failureMessage String?
+  metadata       Json?
+  orderId        String        @db.Uuid
+
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  paidAt      DateTime?
+  failedAt    DateTime?
+  cancelledAt DateTime?
+  refundedAt  DateTime?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, externalId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// ======================================================
+// REVIEW
+// ======================================================
+
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  rating      Int
+  title       String?
+  comment     String?
+  images      String[] @default([])
+  isPublished Boolean  @default(true)
+  profileId   String   @db.Uuid
+  productId   String   @db.Uuid
+  orderItemId String?  @unique @db.Uuid
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  profile   Profile    @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+
+  @@unique([profileId, productId])
+  @@index([productId])
+  @@index([profileId])
+  @@index([rating])
+  @@index([isPublished])
+  @@index([createdAt])
+  @@map("reviews")
 }

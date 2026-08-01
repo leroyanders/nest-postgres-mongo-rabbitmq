@@ -32,6 +32,10 @@ export class EnvironmentVariables {
   @IsString()
   declare APP_JWT_EXPIRES_IN?: string;
 
+  @IsOptional()
+  @IsString()
+  declare APP_JWT_REFRESH_EXPIRES_IN?: string;
+
   @IsString()
   @IsNotEmpty()
   declare RABBITMQ_URL: string;
